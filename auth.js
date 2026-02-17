@@ -104,9 +104,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             alert('Kayıt hatası: ' + error.message);
         } else {
-            alert('Kayıt başarılı! Lütfen e-postanızı kontrol edip onaylayın (Eğer onay kapalıysa giriş yapabilirsiniz).');
-            authModal.style.display = 'none';
-            // If email confirmation is disabled, user is auto-logged in.
+            console.log("Kayıt verisi:", data);
+            if (data.session) {
+                // Email confirmation is DISABLED or auto-confirm is ON
+                alert('Kayıt başarılı! Giriş yapılıyor...');
+                authModal.style.display = 'none';
+                handleUserSession(data.session.user);
+            } else {
+                // Email confirmation is ENABLED
+                alert('Kayıt başarılı! Lütfen e-postanızı (Spam kutusu dahil) kontrol edip onay linkine tıklayın.');
+                authModal.style.display = 'none';
+            }
         }
     });
 
