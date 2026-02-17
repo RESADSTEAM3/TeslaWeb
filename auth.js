@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+    // Initialize Supabase Client
+    const { createClient } = supabase;
+    const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     // DOM Elements
     const loginBtn = document.getElementById('loginBtn');
     const authModal = document.getElementById('authModal');
@@ -16,13 +20,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const usernameSpan = document.getElementById('username');
     const userRoleSpan = document.getElementById('userRole');
 
-    // Check if user is logged in
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser) {
-        showLoggedInState(currentUser.name, currentUser.role);
+    // Check Initial Session
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session) {
+        handleUserSession(session.user);
     } else {
         showLoggedOutState();
     }
+
+    // Auth State Change Listener
+    _supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+            handleUserSession(session.user);
+        } else if (event === 'SIGNED_OUT') {
+            showLoggedOutState();
+        }
+    });
 
     // Event Listeners
     loginBtn.addEventListener('click', () => {
@@ -51,58 +64,59 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Login Form Submission
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = loginForm.querySelector('input[type="email"]').value;
-        const password = loginForm.querySelector('input[type="password"]').value;
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
 
-        // Simple validation (In real app, check against database)
-        const storedUser = JSON.parse(localStorage.getItem(email));
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
 
-        if (storedUser && storedUser.password === password) {
-            localStorage.setItem('currentUser', JSON.stringify(storedUser));
-            showLoggedInState(storedUser.name, storedUser.role);
-            authModal.style.display = 'none';
-            alert('Giriş başarılı! Hoş geldin, ' + storedUser.name + ' (' + storedUser.role + ')');
+        if (error) {
+            alert('Giriş hatası: ' + error.message);
         } else {
-            alert('Hatalı e-posta veya şifre!');
+            authModal.style.display = 'none';
+            // State update handled by onAuthStateChange
         }
     });
 
     // Register Form Submission
-    registerForm.addEventListener('submit', (e) => {
+    registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const name = registerForm.querySelector('input[type="text"]').value;
-        const email = registerForm.querySelector('input[type="email"]').value;
-        const password = registerForm.querySelector('input[type="password"]').value;
-        const role = registerForm.querySelector('#roleSelect').value;
+        const name = document.getElementById('regName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const role = document.getElementById('roleSelect').value;
 
-        if (localStorage.getItem(email)) {
-            alert('Bu e-posta adresi zaten kayıtlı!');
-            return;
-        }
-
-        const newUser = {
-            name: name,
+        const { data, error } = await _supabase.auth.signUp({
             email: email,
-            password: password, // In real app, never store plain text passwords!
-            role: role
-        };
+            password: password,
+            options: {
+                data: {
+                    full_name: name,
+                    role: role,
+                },
+            },
+        });
 
-        localStorage.setItem(email, JSON.stringify(newUser));
-        localStorage.setItem('currentUser', JSON.stringify(newUser)); // Auto login
-
-        showLoggedInState(name, role);
-        authModal.style.display = 'none';
-        alert('Kayıt başarılı! Hoş geldin, ' + name + ' (' + role + ')');
+        if (error) {
+            alert('Kayıt hatası: ' + error.message);
+        } else {
+            alert('Kayıt başarılı! Lütfen e-postanızı kontrol edip onaylayın (Eğer onay kapalıysa giriş yapabilirsiniz).');
+            authModal.style.display = 'none';
+            // If email confirmation is disabled, user is auto-logged in.
+        }
     });
 
     // Logout
-    logoutBtn.addEventListener('click', (e) => {
+    logoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        localStorage.removeItem('currentUser');
-        showLoggedOutState();
-        alert('Çıkış yapıldı.');
+        const { error } = await _supabase.auth.signOut();
+        if (error) {
+            alert('Çıkış hatası: ' + error.message);
+        }
     });
 
     // Helper Functions
@@ -116,15 +130,14 @@ document.addEventListener('DOMContentLoaded', function () {
         registerFormContainer.style.display = 'block';
     }
 
-    function showLoggedInState(name, role) {
+    function handleUserSession(user) {
+        const name = user.user_metadata.full_name || user.email;
+        const role = user.user_metadata.role || 'Öğrenci';
+
         authButtons.style.display = 'none';
         userSection.style.display = 'flex';
         usernameSpan.textContent = name;
-        if (role) {
-            userRoleSpan.textContent = '(' + role + ')';
-        } else {
-            userRoleSpan.textContent = '';
-        }
+        userRoleSpan.textContent = '(' + role + ')';
     }
 
     function showLoggedOutState() {
@@ -132,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
         userSection.style.display = 'none';
         usernameSpan.textContent = '';
         userRoleSpan.textContent = '';
-        loginForm.reset();
-        registerForm.reset();
+        if (loginForm) loginForm.reset();
+        if (registerForm) registerForm.reset();
     }
 });
