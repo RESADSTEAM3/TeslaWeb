@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla Eğitim Kursu</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container header-container">
+            <h1 class="logo">Tesla</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#detaylar">Kurs Hakkında</a></li>
+                    <li><a href="#destek">Destek</a></li>
+                    <li id="authButtons">
+                        <a href="#" id="loginBtn" class="btn-login">Giriş Yap / Kayıt Ol</a>
+                    </li>
+                    <li id="userSection" style="display: none; align-items: center; gap: 10px;">
+                        <span style="font-weight: bold; color: var(--primary-color);">Hoş geldin, <span
+                                id="username"></span> <span id="userRole"
+                                style="font-size: 0.8em; color: #666;"></span></span>
+                        <a href="#" id="logoutBtn" style="color: red; font-size: 0.9rem;">Çıkış</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+
+            <div id="loginFormContainer">
+                <h2>Giriş Yap</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>E-posta</label>
+                        <input type="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-submit">Giriş Yap</button>
+                </form>
+                <p class="switch-text">Hesabın yok mu? <a href="#" id="switchToRegister">Kayıt Ol</a></p>
+            </div>
+
+            <div id="registerFormContainer" style="display: none;">
+                <h2>Kayıt Ol</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>Ad Soyad</label>
+                        <input type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-posta</label>
+                        <input type="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Şifre</label>
+                        <input type="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-submit">Kayıt Ol</button>
+                </form>
+                <p class="switch-text">Zaten hesabın var mı? <a href="#" id="switchToLogin">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>Geleceği Şekillendirin</h2>
+            <p>Modern teknoloji ve inovasyon kursumuza katılın. Kendinizi geliştirin, fark yaratın.</p>
+            <a href="#detaylar" class="btn">Detayları İncele</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="detaylar" class="about">
+        <div class="container">
+            <h3>Kurs Hakkında</h3>
+            <p>Bu kurs, size sektördeki en yeni yetkinlikleri kazandırmak için tasarlandı. Teorik bilgiden çok, gerçek
+                dünya projelerine odaklanıyoruz.</p>
+
+            <div class="features">
+                <div class="feature-card">
+                    <h4>Uzman Eğitmenler</h4>
+                    <p>Alanında deneyimli profesyonellerden eğitim alın.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Güncel Müfredat</h4>
+                    <p>Teknolojinin son trendlerini kaçırmayın.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Sertifika</h4>
+                    <p>Kursu tamamladığınızda başarı sertifikası kazanın.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Curriculum Section -->
+    <section class="curriculum">
+        <div class="container">
+            <h3>Eğitim İçeriği</h3>
+            <ul class="course-list">
+                <li>Giriş ve Temel Kavramlar</li>
+                <li>İleri Seviye Teknikler</li>
+                <li>Proje Geliştirme Süreçleri</li>
+                <li>Sektörel Uygulamalar</li>
+                <li>Kariyer Planlama ve Portföy</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section id="destek" class="support">
+        <div class="container">
+            <h3>Destek ve İletişim</h3>
+            <p>Sorularınız mı var? Bize hemen yazın.</p>
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="email">E-posta Adresiniz</label>
+                    <input type="email" id="email" name="email" placeholder="ornek@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Sorunuz</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Sorunuzu buraya yazın..."
+                        required></textarea>
+                </div>
+                <button type="submit" class="btn btn-submit">Gönder</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            var userEmail = document.getElementById('email').value;
+            var message = document.getElementById('message').value;
+
+            var subject = "Tesla Kursu Destek Talebi";
+            var body = "Gönderen: " + userEmail + "\n\nMesaj:\n" + message;
+
+            // Mailto linki oluştur
+            var mailtoLink = "mailto:resadsunn@gmail.com" +
+                "?subject=" + encodeURIComponent(subject) +
+                "&body=" + encodeURIComponent(body);
+
+            // Kullanıcının varsayılan mail uygulamasını aç
+            window.location.href = mailtoLink;
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Tesla Eğitim Kursu. Tüm hakları saklıdır.</p>
+            <p>İletişim: info@teslakursu.com</p>
+        </div>
+    </footer>
+
+    <script src="auth.js?v=2"></script>
+</body>
+
+</html>
